@@ -1,6 +1,7 @@
 import requests
 from bs4 import BeautifulSoup
 import pandas as pd
+import re
 
 # Function to get page content
 def fetch_page_content(url):
@@ -33,9 +34,17 @@ def extract_practice_areas(soup):
 
     return list(set(practice_areas))  # Remove duplicates
 
+# Function to extract emails using regex
+def extract_emails(text):
+    # Regex pattern for most emails
+    email_pattern = r"[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}"
+    found_emails = re.findall(email_pattern, text)
+    return list(set(found_emails))  # Remove duplicates
+
 # Function to extract data
 def extract_data(html, url):
     soup = BeautifulSoup(html, "lxml")
+    text = soup.get_text()
 
     # Extract title of the page
     title = soup.title.string.strip() if soup.title else "No Title Found"
@@ -43,10 +52,14 @@ def extract_data(html, url):
     # Extract practice areas
     practice_areas = extract_practice_areas(soup)
 
+    # Extract emails
+    emails = extract_emails(text)
+
     return {
         "URL": url,
         "Title": title,
-        "Practice Areas": ", ".join(practice_areas) if practice_areas else "None Found"
+        "Practice Areas": ", ".join(practice_areas) if practice_areas else "None Found",
+        "Emails": ", ".join(emails) if emails else "None Found"
     }
 
 # Function to scrape multiple URLs and save to file
@@ -84,8 +97,6 @@ def main():
 
 if __name__ == "__main__":
     main()
-# This is a web scraping script that extracts practice areas from law firm websites.
-
 
 
 
@@ -456,5 +467,3 @@ if __name__ == "__main__":
 
 # if __name__ == "__main__":
 #     main()
-
-
